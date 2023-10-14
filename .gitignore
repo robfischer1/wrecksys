@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.yarn/
+
+# Next.js
+.next/
+out/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# ML artifacts
+*.keras
+*.tflite
+*.tfrecord
+*.npz
+*.npy
+.ipynb_checkpoints/
+
+# Training logs and checkpoints
+src/wrecksys_ai/model/model_dir/logs/
+src/wrecksys_ai/model/model_dir/ckpt-*
+src/wrecksys_ai/model/model_dir/checkpoint
+build/logs/
+
+# WSL metadata
+*Zone.Identifier
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

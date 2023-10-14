@@ -1,0 +1,10 @@
+{
+  "directory": "../temp",
+  "files": {
+    "books": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/byGenre/goodreads_books_fantasy_paranormal.json.gz",
+    "authors": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/goodreads_book_authors.json.gz",
+    "works": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/goodreads_book_works.json.gz",
+    "reviews": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/byGenre/goodreads_reviews_fantasy_paranormal.json.gz",
+    "ratings": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/byGenre/goodreads_interactions_fantasy_paranormal.json.gz"
+  }
+}
