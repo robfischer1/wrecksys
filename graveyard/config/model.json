@@ -1,0 +1,9 @@
+{
+    "vocabulary_size": 22995,
+    "embedding_dimensions": 8,
+    "min_series_length": 3,
+    "max_series_length": 10,
+    "train_size": 12491190,
+    "test_size": 1387910,
+    "batch_size": 512
+}
