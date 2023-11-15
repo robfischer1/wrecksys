@@ -1,0 +1,37 @@
+{
+
+    "base_dir": "C:\\Users\\robfi\\Desktop\\capstone_3",
+    "data_dir": "data/",
+    "export_dir": "exports/",
+    "sources": {
+        "books": {
+            "original": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/byGenre/goodreads_books_fantasy_paranormal.json.gz",
+            "converted": ""
+        },
+        "authors": {
+            "original": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/goodreads_book_authors.json.gz",
+            "converted": ""
+        },
+        "works": {
+            "original": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/goodreads_book_works.json.gz",
+            "converted": ""
+        },
+        "reviews": {
+            "original": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/byGenre/goodreads_reviews_fantasy_paranormal.json.gz",
+            "converted": ""
+        },
+        "ratings": {
+            "original": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/byGenre/goodreads_interactions_fantasy_paranormal.json.gz",
+            "converted": ""
+        }
+    },
+    "model": {
+        "vocabulary_size": 22995,
+        "embedding_dimensions": 8,
+        "min_series_length": 3,
+        "max_series_length": 10,
+        "train_size": 12491190,
+        "test_size": 1387910,
+        "batch_size": 512
+    }
+}
