@@ -1,0 +1,45 @@
+{
+    "sources": {
+        "authors": {
+            "file_name": "goodreads_book_authors",
+            "source_url": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/goodreads_book_authors.json.gz"
+        },
+        "books": {
+            "file_name": "goodreads_books_fantasy_paranormal",
+            "source_url": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/byGenre/goodreads_books_fantasy_paranormal.json.gz"
+        },
+        "ratings": {
+            "file_name": "goodreads_interactions_fantasy_paranormal",
+            "source_url": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/byGenre/goodreads_interactions_fantasy_paranormal.json.gz"
+        },
+        "reviews": {
+            "file_name": "goodreads_reviews_fantasy_paranormal",
+            "source_url": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/byGenre/goodreads_reviews_fantasy_paranormal.json.gz"
+        },
+        "works": {
+            "file_name": "goodreads_book_works",
+            "source_url": "https://datarepo.eng.ucsd.edu/mcauley_group/gdrive/goodreads/goodreads_book_works.json.gz"
+        }
+    },
+    "model": {
+        "embedding_dimensions": 16,
+        "rnn_dimensions": 32,
+        "min_series_length": 3,
+        "max_series_length": 10,
+        "dataset_shards": 10,
+        "vocabulary_size": 22997,
+        "train_size": 12972672,
+        "test_size": 1441408,
+        "batch_size": 240,
+        "num_predictions": 100
+    },
+    "files": {
+        "example_file": "examples/{}_example.json",
+        "output_file": "raw/{}.feather",
+        "test_file": "test{:02}.tfrecord",
+        "train_file": "train{:02}.tfrecord",
+        "database": "app.db",
+        "rating_product": "clean/ratings.feather",
+        "book_product": "clean/books.feather"
+    }
+}
