@@ -1,0 +1,30 @@
+services:
+  serving:
+    image: robfischer1/wrecksys:serving
+    build:
+      context: .
+      dockerfile: docker/serving/Dockerfile
+    ports:
+      - "8501:8501"
+
+  tensorboard:
+    image: robfischer1/wrecksys:tensorboard
+    build:
+      context: .
+      dockerfile: docker/tensorboard/Dockerfile
+    ports:
+      - "6006:6006"
+    volumes:
+      - ./build/logs:/logdir
+
+  devcontainer:
+    build:
+      context: .
+      dockerfile: docker/devcontainer/Dockerfile
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./data:/data
+      - ./src:/src
+
+
