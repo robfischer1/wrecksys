@@ -1,4 +1,4 @@
-FROM node:lts-slim as base
+FROM node:21 as base
 
 FROM base AS deps
 WORKDIR /app
@@ -8,10 +8,10 @@ RUN yarn --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
-RUN apt-get update && apt-get -y --no-install-recommends install \
-    python3-minimal \
-    node-gyp \
-    && rm -rf /var/lib/apt/lists /var/cache/apt/archives
+# RUN apt-get update && apt-get -y --no-install-recommends install \
+#    python3-minimal \
+#    node-gyp \
+#    && rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -58,7 +58,6 @@ USER nextjs
 EXPOSE 3000
 
 ENV PORT 3000
-# set hostname to localhost
 ENV HOSTNAME "0.0.0.0"
 
 CMD ["node", "server.js"]

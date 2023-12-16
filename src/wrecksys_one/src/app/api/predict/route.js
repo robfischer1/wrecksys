@@ -1,6 +1,5 @@
 import getBooks from '@/app/api/_lib/db'
 
-const tf = require('@tensorflow/tfjs-node')
 const TOP_N = 20
 
 function createContext (data) {
@@ -9,15 +8,28 @@ function createContext (data) {
   const padValues = (v) => v.concat(new Array(10 - v.length).fill(0))
 
   return [data.book_ids, {
-    context_id: tf.tensor1d(padValues(bookIds), 'int32'),
-    context_rating: tf.tensor1d(padValues(bookRatings))
+    "inputs": {
+      "context_id": padValues(bookIds),
+      "context_rating": padValues(bookRatings)
+    }
   }]
 }
 
 async function makePredictions (context) {
-  return await tf.loadGraphModel('file://./assets/web_model/model.json')
-    .then((model) => model.predictAsync(context))
-    .then((results) => results[1].array())
+  return await fetch('http://serving:8501/v1/models/wrecksys:predict', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(context)
+  })
+    .then((response) => response.json())
+    .then((results) => results['outputs']['recommendation_ids'])
+
+
+//  return await tf.loadGraphModel('file://./assets/web_model/model.json')
+//    .then((model) => model.predictAsync(context))
+//    .then((results) => results[1].array())
 }
 
 export async function POST (request) {

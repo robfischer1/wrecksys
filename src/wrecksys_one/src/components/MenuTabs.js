@@ -11,7 +11,7 @@ const pages = {
   '/about': { index: 1, title: 'About', href: '/about' },
   '/books': { index: 2, title: 'Books', href: '/books' },
   '/books/suggest': { index: 3, title: 'Suggestions', href: '/books/suggest' },
-  '/capstone': { index: 4, title: 'Capstone', href: '/capstone' }
+  '/capstone': { index: 4, title: 'Capstone', href: 'https://colab.research.google.com/github/robfischer1/goodreads-recs/blob/master/Capstone.ipynb' }
 }
 
 export function MenuHidden () {
