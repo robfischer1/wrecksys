@@ -47,8 +47,7 @@ jobs:
           aws ec2 authorize-security-group-ingress \
             --group-id ${{ env.SG_ID }} \
             --protocol tcp --port 22 \
-            --cidr ${{ steps.ip.outputs.addr }}/32 \
-            --tag-specifications 'ResourceType=security-group-rule,Tags=[{Key=Name,Value=github-actions-temp}]'
+            --cidr ${{ steps.ip.outputs.addr }}/32
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
