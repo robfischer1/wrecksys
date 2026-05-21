@@ -9,10 +9,16 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
 env:
   AWS_REGION: us-east-2
-  ECR_REPO: 757938331536.dkr.ecr.us-east-2.amazonaws.com/wrecksys
-  SG_ID: sg-0e4e76a0b817631db
 
 jobs:
   build-and-deploy:
@@ -21,22 +27,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build and push Docker image
-        working-directory: src/wrecksys_one
-        run: |
-          docker build -t wrecksys .
-          docker tag wrecksys:latest ${{ env.ECR_REPO }}:latest
-          docker push ${{ env.ECR_REPO }}:latest
+        uses: docker/build-push-action@v6
+        with:
+          context: src/wrecksys_one
+          push: true
+          tags: |
+            ${{ secrets.ECR_REPO }}:latest
+            ${{ secrets.ECR_REPO }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Get runner IP
         id: ip
@@ -45,7 +57,7 @@ jobs:
       - name: Open SSH for runner
         run: |
           aws ec2 authorize-security-group-ingress \
-            --group-id ${{ env.SG_ID }} \
+            --group-id ${{ secrets.SG_ID }} \
             --protocol tcp --port 22 \
             --cidr ${{ steps.ip.outputs.addr }}/32
 
@@ -56,19 +68,39 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            ECR_REPO="${{ secrets.ECR_REPO }}"
+            REGISTRY="${ECR_REPO%%/*}"
             PREV=$(docker ps --filter "name=wrecksys" --format "{{.ID}}" -a)
             if [ -n "$PREV" ]; then
               docker stop wrecksys
               docker rm $PREV
             fi
-            aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 757938331536.dkr.ecr.us-east-2.amazonaws.com
-            docker pull 757938331536.dkr.ecr.us-east-2.amazonaws.com/wrecksys:latest
-            docker run -d -p 3000:3000 --name wrecksys --restart always 757938331536.dkr.ecr.us-east-2.amazonaws.com/wrecksys:latest
+            aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $REGISTRY
+            docker pull $ECR_REPO:latest
+            docker run -d -p 3000:3000 --name wrecksys --restart always $ECR_REPO:latest
+
+      - name: Health check
+        run: |
+          echo "Waiting for container to start..."
+          sleep 10
+          for i in 1 2 3 4 5; do
+            if curl -sfk --max-time 5 https://${{ secrets.EC2_HOST }} > /dev/null 2>&1; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          echo "::warning::Health check failed after 5 attempts — container may still be starting"
 
       - name: Close SSH for runner
         if: always()
         run: |
           aws ec2 revoke-security-group-ingress \
-            --group-id ${{ env.SG_ID }} \
+            --group-id ${{ secrets.SG_ID }} \
             --protocol tcp --port 22 \
             --cidr ${{ steps.ip.outputs.addr }}/32 || true
+
+      - name: Clean up old IAM access keys
+        if: false
+        run: echo "Static IAM keys replaced by OIDC — delete github-actions-wrecksys user when confirmed working"
