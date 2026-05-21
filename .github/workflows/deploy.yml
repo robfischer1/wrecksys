@@ -12,6 +12,7 @@ on:
 env:
   AWS_REGION: us-east-2
   ECR_REPO: 757938331536.dkr.ecr.us-east-2.amazonaws.com/wrecksys
+  SG_ID: sg-0e4e76a0b817631db
 
 jobs:
   build-and-deploy:
@@ -37,6 +38,18 @@ jobs:
           docker tag wrecksys:latest ${{ env.ECR_REPO }}:latest
           docker push ${{ env.ECR_REPO }}:latest
 
+      - name: Get runner IP
+        id: ip
+        run: echo "addr=$(curl -s https://checkip.amazonaws.com)" >> "$GITHUB_OUTPUT"
+
+      - name: Open SSH for runner
+        run: |
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ env.SG_ID }} \
+            --protocol tcp --port 22 \
+            --cidr ${{ steps.ip.outputs.addr }}/32 \
+            --tag-specifications 'ResourceType=security-group-rule,Tags=[{Key=Name,Value=github-actions-temp}]'
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
         with:
@@ -52,3 +65,11 @@ jobs:
             aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 757938331536.dkr.ecr.us-east-2.amazonaws.com
             docker pull 757938331536.dkr.ecr.us-east-2.amazonaws.com/wrecksys:latest
             docker run -d -p 3000:3000 --name wrecksys --restart always 757938331536.dkr.ecr.us-east-2.amazonaws.com/wrecksys:latest
+
+      - name: Close SSH for runner
+        if: always()
+        run: |
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ env.SG_ID }} \
+            --protocol tcp --port 22 \
+            --cidr ${{ steps.ip.outputs.addr }}/32 || true
