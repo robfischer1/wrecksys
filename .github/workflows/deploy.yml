@@ -80,18 +80,22 @@ jobs:
             docker run -d -p 3000:3000 --name wrecksys --restart always $ECR_REPO:latest
 
       - name: Health check
-        run: |
-          echo "Waiting for container to start..."
-          sleep 10
-          for i in 1 2 3 4 5; do
-            if curl -sfk --max-time 5 https://${{ secrets.EC2_HOST }} > /dev/null 2>&1; then
-              echo "Health check passed"
-              exit 0
-            fi
-            echo "Attempt $i failed, retrying in 10s..."
-            sleep 10
-          done
-          echo "::warning::Health check failed after 5 attempts — container may still be starting"
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            for i in 1 2 3 4 5; do
+              if curl -sf --max-time 5 http://localhost:3000 > /dev/null 2>&1; then
+                echo "Health check passed"
+                exit 0
+              fi
+              echo "Attempt $i — waiting 5s..."
+              sleep 5
+            done
+            echo "Health check failed after 5 attempts"
+            exit 1
 
       - name: Close SSH for runner
         if: always()
@@ -100,7 +104,3 @@ jobs:
             --group-id ${{ secrets.SG_ID }} \
             --protocol tcp --port 22 \
             --cidr ${{ steps.ip.outputs.addr }}/32 || true
-
-      - name: Clean up old IAM access keys
-        if: false
-        run: echo "Static IAM keys replaced by OIDC — delete github-actions-wrecksys user when confirmed working"
