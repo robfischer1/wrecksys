@@ -39,6 +39,10 @@ build/logs/
 .env
 .env.local
 
+# Caches
+.pytest_cache/
+.mypy_cache/
+
 # OS
 .DS_Store
 Thumbs.db
