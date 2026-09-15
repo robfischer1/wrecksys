@@ -1,3 +1,6 @@
+# DL3026 is exempt in this repo (Rob, 2026-09-15): wrecksys runs on AWS with no
+# access to the fleet's internal registry proxy, so its bases come from public registries.
+# hadolint ignore=DL3026
 FROM ubuntu:latest as base
 RUN apt-get update && apt-get -y --no-install-recommends install \
     python3-venv \
