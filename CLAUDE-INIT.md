@@ -40,7 +40,6 @@ Two parallel Python packages exist — know which one you're touching:
 - `src/app/api/_lib/db.js` — shared SQLite helper (`getBooks({page} | {bookIds})`) against `assets/app.db`; mutually exclusive `page`/`bookIds` args (throws `TypeError` if both/neither given).
 - `src/components/` — `BookGrid`, `BookRating`, `FloatingNav`, `HeroImage`, `MenuTabs`, `RexIcon`, `SummarySection`.
 - `src/context/` — React context providers: `BooksContextProvider`, `RatingsContextProvider`, `WrecksContextProvider`, `ContextProviders` (composition root), `ThemeRegistry/` (MUI + Emotion SSR cache setup).
-- `src/trash/` — dead frontend code (old Dockerfiles, old components/routes). Not imported.
 - `assets/` — `app.db` (SQLite book metadata), `export/` (SavedModel copy for local serving), `web_model/` (TF.js model — there's commented-out client-side inference code in `predict/route.js` referencing this, currently unused; serving goes through the TF Serving container instead).
 
 ## Entry points
@@ -86,7 +85,6 @@ CI/CD (`.github/workflows/`): `deploy.yml` triggers on push to `main` touching `
 - **Import-time side effects.** `src/wrecksys_ai/model/model_maker.py` trains and exports a model as a module-level statement. `data/test/schema_test.py` calls `parse_fn()` at import time. Don't `import` these for their functions without expecting the side effect, or read them fully before running.
 - **`config.json` is mutable state, not just static config.** `ConfigFile.save()` round-trips `self.data` back to `config.json`, popping/restoring the derived `paths` object around the dump. `model_maker.train_and_eval()` mutates `model_config.train_size`/`test_size` in place — this is process-lifetime config, not persisted unless `.save()` is called.
 - **TensorFlow import noise is deliberately suppressed** in `io/load.py`, `io/pipeline.py`, and `model_maker.py` via a `warnings.catch_warnings()` + logger-level dance before `import tensorflow as tf` — follow the same pattern if adding new TF-importing modules, per the inline comment ("the dumbest piece of code I've ever written").
-- **`src/wrecksys_one/src/trash/`** is dead frontend code kept in-tree; don't treat it as a reference implementation without checking it's not simply stale.
 - **`graveyard/`** at repo root is explicitly retired — same rule, stronger: nothing there is imported by live code.
 - **No root-level Python package manifest.** There's no `pyproject.toml`/`setup.py`, so `src/wrecksys_ai` and `wrecksys` are imported via `PYTHONPATH`/notebook `sys.path` conventions, not an installed package — check how a given entry point is actually invoked (notebook cell, `python -m`, etc.) before assuming `pip install -e .` works.
 - **Frontend served-model path duality.** `predict/route.js` calls the TF Serving HTTP API by default; a commented-out branch would instead load `assets/web_model/` client-side via `tf.loadGraphModel`. Only the serving-container path is live.
